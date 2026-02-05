@@ -20,6 +20,7 @@ const BookForm = ({ isEdit = false }) => {
 
   const [authors, setAuthors] = useState([]);
   const [tags, setTags] = useState([]);
+  const [pdfFile, setPdfFile] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -79,6 +80,23 @@ const BookForm = ({ isEdit = false }) => {
     }));
   };
 
+  const handlePDFChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        alert('Please select a PDF');
+        e.target.value = '';
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Pdf size should be less than 10 MB');
+        e.target.value = '';
+        return;
+      }
+      setPdfFile(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,11 +108,24 @@ const BookForm = ({ isEdit = false }) => {
       setSubmitting(true);
       setError(null);
 
-      const submitData = {
-        ...formData,
-        author: parseInt(formData.author),
-        published_date: formData.published_date || null,
-      };
+      const submitData = new FormData();
+      submitData.append('title', formData.title);
+      submitData.append('author', parseInt(formData.author));
+      submitData.append('description', formData.description);
+      submitData.append('isbn', formData.isbn);
+
+      if (formData.published_date) {
+        submitData.append('published_date', formData.published_date);
+      }
+
+      formData.tags.forEach((tagId) => {
+        submitData.append('tags', tagId);
+      });
+
+      if (pdfFile) {
+        submitData.append('pdf_file', pdfFile);
+      }
+      
 
       if (isEdit) {
         await bookService.updateBook(id, submitData);
@@ -248,6 +279,20 @@ const BookForm = ({ isEdit = false }) => {
             onChange={handleChange}
             style={styles.input}
           />
+        </div>
+
+        <div>
+          <label htmlFor="pdf_file">Upload PDF</label>
+          <input
+            type="file"
+            name="pdf_file"
+            id="pdf_file"
+            accept=".pdf"
+            onChange={handlePDFChange}
+            disabled={submitting}
+          />
+          {pdfFile &&
+            <p>Selected: {pdfFile.name}</p>}
         </div>
 
         {/* Buttons */}

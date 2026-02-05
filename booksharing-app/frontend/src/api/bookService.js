@@ -22,15 +22,38 @@ export const bookService = {
   },
 
   createBook: (bookData) => {
-    return axiosInstance.post('books/', bookData);
+    const config = bookData instanceof FormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } : {};
+    return axiosInstance.post('books/', bookData, config);
   },
 
   updateBook: (id, bookData) => {
-    return axiosInstance.put(`books/${id}/`, bookData);
+    const config = bookData instanceof FormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } : {};
+    return axiosInstance.put(`books/${id}/`, bookData, config);
+  },
+
+  partialUpdateBook: (id, bookData) => {
+    const config = bookData instanceof FormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } : {};
+    return axiosInstance.patch(`books/${id}/`, bookData, config);
   },
 
   deleteBook: (id) => {
     return axiosInstance.delete(`books/${id}/`);
+  },
+
+  downloadPDF: (id) => {
+    return axiosInstance.get(`books/${id}/download_pdf`, {
+      responseType: 'blob'
+    });
+  },
+
+  deletePDF: (id) => {
+    return axiosInstance.delete(`books/${id}/delete_pdf/`);
   },
 };
 

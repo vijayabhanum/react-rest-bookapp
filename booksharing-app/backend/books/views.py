@@ -1,9 +1,12 @@
 from django.shortcuts import render
+from django.http import FileResponse, Http404
+import os
 
 # Create your views here.
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Author, Tag, Book
 from .serializers import (
@@ -38,6 +41,7 @@ class TagViewSet(viewsets.ModelViewSet):
 class BookViewSet(viewsets.ModelViewSet):
   queryset = Book.objects.select_related(
       'author').prefetch_related('tags').all()
+  parser_classes = (MultiPartParser, FormParser)
   filter_backends = [
     filters.SearchFilter,
     filters.OrderingFilter
@@ -62,8 +66,59 @@ class BookViewSet(viewsets.ModelViewSet):
       return Response(serializer.data)
     return([])
   
+  @action(detail=True, methods=['get'])
+  def download_pdf(self, request, pk=None):
+    book = self.get_object()
 
+    #  # Option 2: Use pk directly
+    # book = Book.objects.get(pk=pk)
+    
+    # # Option 3: Use self.kwargs
+    # book = Book.objects.get(pk=self.kwargs['pk'])
+    # we can use other options too as pk=None means jsut saying 
+    # python that its an optional param, while here its passed as 
+    # kwargs['pk'] decoded from url , well the viewset does that 
+    # for you.... but get_object() living it emptry gives 
+    # itself power to handle errors, permissions and filters
+    
 
+    if not book.pdf_file:
+      return Response({'error':'No pdf file'},
+                      status=status.HTTP_404_NOT_FOUND)
+
+    try:
+      file_path = book.pdf_file.path
+      if os.path.exists(file_path):
+        response = FileResponse(
+            open(file_path, 'rb'),
+            content_type='application/pdf'
+          )
+        filename = f"{book.title.replace(' ', '-')}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+      else: 
+        return Response({'error':'file not found'},
+                        status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+      return Response({'error': str(e)},
+                      status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  
+  @action(detail=True, methods=['delete'])
+  def delete_pdf(self, request, pk=None):
+    book = self.get_object()
+
+    if not book.pdf_file:
+      return Response(
+        {'error': 'No pdf'}, status=status.HTTP_404_NOT_FOUND
+      )
+    
+    book.pdf_file.delete()
+    book.save()
+
+    return Response(
+      {'messgae':'pdf deleted succesfully'},
+      status=status.HTTP_200_OK
+    )
 
 
 # GET	/api/books/	list()	Get all books

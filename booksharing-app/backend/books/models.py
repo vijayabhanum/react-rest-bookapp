@@ -31,6 +31,7 @@ class Book(models.Model):
                                 related_name='books')
   isbn = models.CharField(max_length=13, blank=True)
   published_date = models.DateField(null=True, blank=True)
+  pdf_file = models.FileField(upload_to='books/pdfs/', blank=True, null=True)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now_add=True)
 

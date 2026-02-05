@@ -9,7 +9,8 @@ const BookDetail = () => {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [uploadingPDF, setUploadingPDF] = useState(false);
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
 
 
   const fetchBook = useCallback(async () => {
@@ -40,6 +41,71 @@ const BookDetail = () => {
       } catch (err) {
         alert('failed to delete book ');
         console.error('error deleting book', err);
+      }
+    }
+  };
+
+  const handlePDFUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      alert('Please upload pdf file only');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('pdf size more than 10 mb');
+      return;
+    }
+
+    try {
+      setUploadingPDF(true);
+      const formData = new FormData();
+      formData.append('pdf_file', file);
+      await bookService.partialUpdateBook(id, formData);
+      alert('pdf uploaded succesfully');
+    } catch (err) {
+      alert('failed to upload pdf ');
+      console.log("error uploading pdf", err);
+    } finally {
+      setUploadingPDF(false);
+      event.target.value = '';
+    }
+  };
+
+
+  const handlePDFDownload = async () => {
+    try {
+      setDownloadingPDF(true);
+      const response = await bookService.downloadPDF(id);
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${book.title.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('failed to download pdf');
+      console.error('error downloading pdf', err);
+    } finally {
+      setDownloadingPDF(false);
+    }
+  };
+
+  const handlePDFDelete = async () => {
+    if (window.confirm('Are you sure you want to delete \
+      PDF file?')) {
+      try {
+        await bookService.deletePDF(id);
+        alert('pdf deleted succrsfullt');
+        fetchBook();
+      } catch (err) {
+        alert('failed to delete PDF');
+        console.error('error deleting pdf', err);
       }
     }
   };
@@ -118,7 +184,7 @@ const BookDetail = () => {
           )}
           {book.published_date && (
             <div style={styles.metaItem}>
-              <strong>Piblished:</strong>
+              <strong>Published:</strong>
               {new Date(book.published_date).toLocaleDateString()}
             </div>
           )}
@@ -138,10 +204,49 @@ const BookDetail = () => {
             </button>
 
           </div>
-
         </div>
 
+        <div>
+          <h2>PDF File</h2>
+          {book.has_pdf ? (
+            <div>
+              <p>PDF File available</p>
+              <div>
+                <button
+                  onClick={handlePDFDownload}
+                  disabled={downloadingPDF}
+                >
+                  {downloadingPDF ? 'Downloading' : 'Download PDF'}
+                </button>
+                <button
+                  onClick={handlePDFDelete}
+                >Delete PDF</button>
+              </div>
+            </div>
+          ) : (
+              <div>
+                <p>no PDF uploaded</p>
+                <label>
+                  {uploadingPDF ? 'Uploading...' : 'Upload PDF'}
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handlePDFUpload}
+                  disabled={uploadingPDF}
+                  style={{display:'none'}}
+                />
+              </div>
+          )}
+        </div>
 
+        <div>
+          <h2>Metadata</h2>
+          <p><strong>Created:</strong>
+            {new Date(book.created_at).toLocaleString()}</p>
+          <p><strong>Updated:</strong>
+            {new Date(book.updated_at).toLocaleDateString()}</p>
+        </div>
       </div>
     </div>
   );
@@ -263,6 +368,7 @@ const styles = {
     color: '#3498db',
     textDecoration: 'none',
   },
+  
 };
 
 export default BookDetail;
