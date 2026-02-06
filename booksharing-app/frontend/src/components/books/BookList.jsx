@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { bookService } from '../../api/bookService';
 import BookCard from './BookCard';
 import Loading from '../layout/Loading';
+import PromotionalVideo from '../video/video';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -77,7 +78,10 @@ const BookList = () => {
 
   return (
     <div>
+
+      <PromotionalVideo />
       <div style={styles.header}>
+
         <h1 style={styles.title}>
           Book Collection
         </h1>

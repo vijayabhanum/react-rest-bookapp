@@ -8,13 +8,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Author, Tag, Book
+from .models import Author, Tag, Book, PromotionalVideo
 from .serializers import (
   AuthorSerializer,
   TagSerializer,
   BookListSerializer,
   BookDetailSerializer,
-  BookCreateUpdateSerializer
+  BookCreateUpdateSerializer, 
+  PromotionalVideoSerializer
 )
 
 
@@ -128,3 +129,8 @@ class BookViewSet(viewsets.ModelViewSet):
 # PATCH	/api/books/5/	partial_update()	Update some fields
 # DELETE	/api/books/5/	destroy()	Delete book
 
+class PromotionalVideoViewSet(viewsets.ReadOnlyModelViewSet):
+  serializer_class = PromotionalVideoSerializer
+
+  def get_queryset(self):
+    return PromotionalVideo.objects.filter(is_active=True)

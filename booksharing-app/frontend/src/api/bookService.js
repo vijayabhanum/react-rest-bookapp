@@ -83,3 +83,8 @@ export const tagService = {
   },
 };
 
+export const videoService = {
+  getActiveVideo: () => {
+    return axiosInstance.get('promotional-videos/');
+  }
+};

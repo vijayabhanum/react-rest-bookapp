@@ -41,3 +41,22 @@ class Book(models.Model):
   class Meta:
     ordering = ['-created_at']
     unique_together = ['title', 'author']
+
+
+class PromotionalVideo(models.Model):
+  title = models.CharField(max_length=200)
+  video_file = models.FileField(upload_to='promotional_videos/')
+  description = models.TextField(blank=True)
+  is_active = models.BooleanField(default=False)
+  uploaded_at = models.DateTimeField(auto_now_add=True)
+
+  def save(self, *args, **kwargs):
+    if self.is_active:
+      PromotionalVideo.objects.filter(is_active=True).update(is_active=False)
+      super().save(*args, **kwargs)
+    
+  def __str__(self):
+    return self.title
+  
+  class Meta:
+    ordering = ['-uploaded_at']

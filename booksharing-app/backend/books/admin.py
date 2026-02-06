@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Author, Book, Tag
+from .models import Author, Book, Tag, PromotionalVideo
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
@@ -22,5 +22,11 @@ class BookAdmin(admin.ModelAdmin):
   filter_horizontal = ['tags']
   autocomplete_fields = ['author']
 
+@admin.register(PromotionalVideo)
+class PromotionalVideoAdmin(admin.ModelAdmin):
+  list_display = ['title', 'is_active', 'uploaded_at']
+  list_filter  = ['is_active', 'uploaded_at']
+  search_fields = ['title', 'description']
 
+  list_editable = ['is_active']
   

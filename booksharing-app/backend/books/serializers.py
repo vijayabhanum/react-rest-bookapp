@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Author, Tag, Book
+from .models import Author, Tag, Book, PromotionalVideo
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -91,3 +91,18 @@ class BookCreateUpdateSerializer(serializers.ModelSerializer):
             this author already exists.')
     
     return data
+  
+
+class PromotionalVideoSerializer(serializers.ModelSerializer):
+  video_url = serializers.SerializerMethodField()
+
+  class Meta:
+    model = PromotionalVideo
+    fields = ['id', 'title', 'description',
+              'video_url', 'uploaded_at']
+    
+  def get_video_url(self, obj):
+    request = self.context.get('request')
+    if request and obj.video_file:
+      return request.build_absolute_uri(obj.video_file.url)
+    return None
