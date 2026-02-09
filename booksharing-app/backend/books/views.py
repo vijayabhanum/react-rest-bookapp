@@ -18,6 +18,9 @@ from .serializers import (
   PromotionalVideoSerializer
 )
 
+from rest_framework.permissions import (
+  IsAuthenticated, IsAuthenticatedOrReadOnly
+)
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -50,6 +53,7 @@ class BookViewSet(viewsets.ModelViewSet):
   search_fields = ['title', 'author__name', 'description']
   ordering_fields = ['title', 'created_at', 'published_date']
   ordering = ['-created_at']
+  permission_classes = [IsAuthenticatedOrReadOnly]
 
   def get_serializer_class(self):
     if self.action == 'list':

@@ -5,6 +5,7 @@ import BookList from './components/books/BookList';
 import BookDetail from './components/books/BookDetail';
 import BookForm from './components/books/BookForm';
 import AuthorList from './components/authors/AuthorList';
+import Login from './components/login/Login';
 import './App.css'
 
 function App() {
@@ -30,6 +31,9 @@ function App() {
             <Route path='/edit-book/:id'
               element={<BookForm isEdit={true} />} />
             
+            <Route path='/login'
+              element={<Login />} />
+
             {/* Catch-all route for 404 */}
             <Route path="*"
               element={<h1>404 - Page Not Found</h1>} />

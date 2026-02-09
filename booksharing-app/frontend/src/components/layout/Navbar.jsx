@@ -1,7 +1,16 @@
 import React from "react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('access_token');
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    navigate('/login');
+  }
+
   return (
     <nav style={styles.nav}>
       <div style={styles.container}>
@@ -18,6 +27,18 @@ const Navbar = () => {
           <Link to="/add-book" style={styles.link} >
             Add Book
           </Link>
+
+          {isLoggedIn ? (
+            <button onClick={handleLogout}
+              style={styles.handleLogout}>
+              Logout
+              </button>
+          ) : (
+              <Link to='/login'>
+                Login
+              </Link>
+          )}
+
         </div>
       </div>
     </nav>
