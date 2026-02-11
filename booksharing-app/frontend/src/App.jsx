@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import BookList from './components/books/BookList';
@@ -9,6 +9,22 @@ import Login from './components/login/Login';
 import './App.css'
 
 function App() {
+
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === 'access_token') {
+        if (event.newValue === null) {
+          window.location.href = '/login';
+        } else {
+          window.location.reload();
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   return (
     <Router>

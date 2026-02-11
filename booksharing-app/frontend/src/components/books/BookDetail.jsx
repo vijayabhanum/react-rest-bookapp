@@ -6,6 +6,7 @@ import Loading from "../layout/Loading";
 const BookDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isLoggedin = !!localStorage.getItem('access_token');
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -188,27 +189,29 @@ const BookDetail = () => {
               {new Date(book.published_date).toLocaleDateString()}
             </div>
           )}
-          
-          <div style={styles.actions}>
-            <button
-              onClick={() => navigate(`/edit-book/${book.id}`)}
-              style={styles.editButton}
-            >
-              Edit Book
-            </button>
-            <button
-              onClick={handleDelete}
-              style={styles.deleteButton}
-            >
-              Delete Book
-            </button>
 
-          </div>
+          {isLoggedin && (
+            <div style={styles.actions}>
+              <button
+                onClick={() => navigate(`/edit-book/${book.id}`)}
+                style={styles.editButton}
+              >
+                Edit Book
+              </button>
+              <button
+                onClick={handleDelete}
+                style={styles.deleteButton}
+              >
+                Delete Book
+              </button>
+
+            </div>)}
+
         </div>
 
         <div>
           <h2>PDF File</h2>
-          {book.has_pdf ? (
+          {book.has_pdf && (
             <div>
               <p>PDF File available</p>
               <div>
@@ -218,25 +221,14 @@ const BookDetail = () => {
                 >
                   {downloadingPDF ? 'Downloading' : 'Download PDF'}
                 </button>
+                {isLoggedin && (
                 <button
                   onClick={handlePDFDelete}
-                >Delete PDF</button>
+                >Delete PDF
+                </button>
+                )}
               </div>
             </div>
-          ) : (
-              <div>
-                <p>no PDF uploaded</p>
-                <label>
-                  {uploadingPDF ? 'Uploading...' : 'Upload PDF'}
-                </label>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handlePDFUpload}
-                  disabled={uploadingPDF}
-                  style={{display:'none'}}
-                />
-              </div>
           )}
         </div>
 

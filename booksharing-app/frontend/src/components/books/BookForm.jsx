@@ -62,6 +62,16 @@ const BookForm = ({ isEdit = false }) => {
     fetchData();
   }, [fetchData]);
 
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      alert("you must be logged in to edit this !!")
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
